@@ -1,3 +1,6 @@
 filemanager_index:
     path:       /
     defaults:   {_controller: "FilemanagerBundle:Filemanager:index"}
+filemanager_actions:
+    path:       /do
+    defaults:   {_controller: "FilemanagerBundle:Filemanager:do"}

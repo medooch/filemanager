@@ -2,6 +2,8 @@
 
 namespace Core\FilemanagerBundle\Twig\Extension;
 
+use Core\FilemanagerBundle\Entity\Files;
+use Core\FilemanagerBundle\Entity\Folders;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\File\File;
@@ -24,6 +26,7 @@ class FilemanagerExtension extends \Twig_Extension
     {
         $this->container = $container;
         $this->fileSystem = new Filesystem();;
+        $this->output = '';
     }
 
     /**
@@ -40,41 +43,51 @@ class FilemanagerExtension extends \Twig_Extension
             'fileType' => new \Twig_Function_Method($this, '_checkFileType'),
             'url_file' => new \Twig_Function_Method($this, 'urlFile'),
             'breadCrumb' => new \Twig_Function_Method($this, 'breadCrumb'),
+            'unset' => new \Twig_Function_Method($this, 'unset_array'),
         );
+    }
+
+    /**
+     * @param array $parameters
+     * @param $key
+     * @return array
+     */
+    public function unset_array(array $parameters, $key)
+    {
+        if (array_key_exists($key, $parameters)) {
+            unset($parameters[$key]);
+        }
+
+        return $parameters;
     }
 
     /**
      * @param string $dir
      * @return string
      */
-    public function breadCrumb($dir = '')
+    public function breadCrumb(Folders $folder)
     {
-        $output = '';
-        $dirs = explode('/', $dir);
-        foreach ($dirs as $key => $dir) {
-            if ($dir) {
-                $key++;
-                $output .= '<li><a ';
-                if (count($dirs) == $key) {
-                    $output .= 'href="#"  class="active"';
-                } else {
-                    $output .= 'href="?dir=' . $dir . '" ';
-                }
-                $output .= '>' . $dir . '</a></li>';
-            }
+        if ($folder->getParent() && $folder->getLvl() != 0) {
+            $this->output .= $this->breadCrumbItem($folder->getParent());
+        } else {
+            $this->output .= $this->breadCrumbItem($folder);
         }
-        return $output;
+
+        return $this->output;
+    }
+
+    public function breadCrumbItem(Folders $folder)
+    {
+        return '<li><a href="?dir=' . $folder->getId() . '">' . $folder->getFullName() . '</a></li>';
     }
 
     /**
-     * @param SplFileInfo $fileInfo
+     * @param Files $file
      * @return string
      */
-    public function urlFile(SplFileInfo $fileInfo)
+    public function urlFile(Files $file)
     {
-        $asset = $this->container->get('assets.packages');
-        $dir = str_replace($this->container->getParameter('kernel.root_dir') . '/../web/', '', $fileInfo->getPathname());
-        return $asset->getUrl($dir);
+        return $this->container->get('assets.packages')->getUrl($file->getFullpath());
     }
 
     /**
@@ -89,15 +102,15 @@ class FilemanagerExtension extends \Twig_Extension
     /**
      * public functions
      */
-    public function _checkFileType(SplFileInfo $fileInfo)
+    public function _checkFileType(Files $file)
     {
-        if (!$this->_doesFileExist($fileInfo->getPathname())) return 'inexistent';
-        $file = new File($fileInfo->getPathname(), true);
+        $path = $this->container->getParameter('kernel.root_dir') . '/../web/' . $file->getFullpath();
+        if (!$this->_doesFileExist($path)) return 'inexistent';
 
         /** check fileExist */
 
         /** @var  $mimeType */
-        $mimeType = $file->getMimeType();
+        $mimeType = $file->getExtension();
 
         if ($this->_isAudio($mimeType)) return 'audio';
         if ($this->_isArchive($mimeType)) return 'archive';
@@ -200,16 +213,27 @@ class FilemanagerExtension extends \Twig_Extension
         }
     }
 
+    /**
+     * @param $path
+     */
     public function removeDir($path)
     {
         $this->fileSystem->remove($path);
     }
 
+    /**
+     * @param $oldDir
+     * @param $newDir
+     */
     public function renameDir($oldDir, $newDir)
     {
         $this->fileSystem->rename($oldDir, $newDir);
     }
 
+    /**
+     * @param $path
+     * @param int $permission
+     */
     public function chmod($path, $permission = 0700)
     {
         $this->fileSystem->chmod($path, $permission);

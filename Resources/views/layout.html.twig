@@ -12,42 +12,172 @@
     <h3 class="text-info">Filemanager</h3>
     <div class="row">
         {% block body %}
-        <div class="col-md-12">
-            <ol class="breadcrumb">
-                <li><a href="{{ url('filemanager_index') }}">Home</a></li>
-                {{ breadCrumb(app.request.query.get('dir'))|raw }}
-            </ol>
-        </div>
-        {% for dir in directories %}
-            <div class="col-md-2">
-                <div class="{{ dir.type }}">
-                    <a href="{{ url('filemanager_index', {'dir' : app.request.query.get('dir') ~ '/' ~ dir.filename}) }}">
-                        <div class="fileicon {{ dir.type }}"></div>
-                        <span class="row text-success text-document">{{ dir.filename }}</span>
-                    </a>
-                </div>
-            </div>
-        {% endfor %}
-        {% for item in files %}
-            <div class="col-md-2">
-                <div class="{{ item.type }}">
-                    <a href="{{ url_file(item) }}">
-                        <div class="fileicon {% if item.type != 'dir' %}{{ fileType(item) }} {% endif %}{{ item.type }}"></div>
-                        <span class="row text-success text-document">{{ item.filename ~ ' ' ~ macros.bytesToSize(item.size) }}</span>
-                    </a>
-                </div>
-            </div>
-        {% endfor %}
+            <div class="col-md-12">
+                <ol class="breadcrumb">
+                    {% set params = app.request.query.all %}
+                    {% if folder.parent %}
+                        {% set params = params|merge({'dir' : folder.parent.id}) %}
+                        <li><a href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-menu-left"></i></a></li>
+                    {% else %}
+                        {% set params = unset(params, 'dir') %}
+                        <li><a href="#"><i class="glyphicon glyphicon-home"></i></a></li>
+                    {% endif %}
+                </ol>
+                <div class="col-md-4">
+                    <div class="actions">
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#new_folder">
+                            New folder
+                        </button>
+                        <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#upload">
+                            Upload
+                        </button>
 
-        {% if not files|length and not directories|length %}
-            <span class="text-warning">This directory is empty</span>
-        {% endif %}
+                        <!-- Modal -->
+                        <div class="modal fade" id="new_folder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                            <div class="modal-dialog modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title" id="myModalLabel">New folder</h4>
+                                    </div>
+                                    <form action="{{ url('filemanager_actions') }}" method="post">
+                                        <div class="modal-body">
+                                            <input required name="folder_name" type="text" class="form-control input-sm" placeholder="Create folder..."/>
+                                            <input type="hidden" name="target" value="{{ folder.id }}"/>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                            <button type="submit" name="action" value="create" class="btn btn-primary">Save changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="upload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title" id="myModalLabel">Upload</h4>
+                                    </div>
+                                    <form action="{{ url('filemanager_actions') }}" method="post" enctype="multipart/form-data">
+                                        <div class="modal-body">
+                                            {{ form_widget(formUpload) }}
+                                            <input type="hidden" name="target" value="{{ folder.id }}"/>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                            <button type="submit" name="action" value="upload_file" class="btn btn-primary">Save changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if not directories|length %}
+                    <div class="col-md-12"><span class="text-warning">This directory is empty</span></div>
+                {% else %}
+                    <div class="col-md-3">
+                        {% set params = app.request.query.all|merge({'view': 'grid' }) %}
+                        <a class="{% if view == 'grid' %}active {% endif %}btn btn-default btn-sm" href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-th-large"></i></a>
+                        {% set params = app.request.query.all|merge({'view': 'list' }) %}
+                        <a class="{% if view == 'list' %}active {% endif %}btn btn-default btn-sm" href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-align-justify"></i></a>
+                    </div>
+                    <div class="pull-right col-md-4">
+                        <div class="actions">
+                            <!-- Single button -->
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="glyphicon glyphicon-sort"></i> <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    {% set direction = 'asc' %}
+                                    {% if app.request.query.get('direction') == 'asc' %}
+                                        {% set direction = 'desc' %}
+                                    {% endif %}
+                                    {% set params = app.request.query.all|merge({'direction': direction }) %}
+                                    {% set params = params|merge({'sort' : 'name'}) %}
+                                    <li><a href="{{ url('filemanager_index', params) }}">Name</a></li>
+                                    {% set params = params|merge({'sort' : 'created-at'}) %}
+                                    <li><a href="{{ url('filemanager_index', params) }}">CreatedAt</a></li>
+                                    {% set params = params|merge({'sort' : 'updated-at'}) %}
+                                    <li><a href="{{ url('filemanager_index', params) }}">UpdatedAt</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        {% for directory in directories %}
+                            <div class="col-md-2">
+                                {% set params = app.request.query.all|merge({'dir' : directory.id}) %}
+                                <a href="{{ url('filemanager_index', params) }}">
+                                    <div class="fileicon dir">
+                                        <span class="row text-success text-document">
+                                            {{ directory.fullName }}
+                                        </span>
+                                    </div>
+                                </a>
+                                <div class="actions">
+                                    <a href=""><i class="glyphicon glyphicon-edit"></i></a>
+                                    <a class="delete_element" href="#" data-href="{{ url('filemanager_actions', {'action' : 'delete', 'target' : directory.id }) }}"><i class="glyphicon glyphicon-trash"></i></a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {% if folder.files|length %}
+                            {% for file in folder.files %}
+                                <div class="col-md-2">
+                                    <a {% if fileType(file) == 'image' %}class="modal_preview" data-toggle="modal" data-target="#modal_preview" data-href="{{ url_file(file) }}" {% else %}target="_blank" href="{{ url_file(file) }}"{% endif %}>
+                                        <div class="fileicon {{ fileType(file) }}">
+                                        <span class="row text-success text-document">
+                                            {{ file.name }}
+                                        </span>
+                                        </div>
+                                    </a>
+                                    <div class="actions">
+                                        <a href=""><i class="glyphicon glyphicon-edit"></i></a>
+                                        {#<a class="delete_element" href="#" data-href="{{ url('filemanager_actions', {'action' : 'delete', 'target' : directory.id }) }}"><i class="glyphicon glyphicon-trash"></i></a>#}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="modal fade remote" id="modal_preview" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                <div class="modal-dialog modal-sm" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <img id="preview_image"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
     </div>
-    {% endblock %}
-</div>
 </div>
 
 <script src="{{ asset('bundles/filemanager/node_modules/jquery/dist/jquery.min.js') }}" type="text/javascript"></script>
 <script src="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/js/bootstrap.min.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+    $('.delete_element').on('click', function () {
+        var btn = $(this);
+        if (confirm("Do you confirm?")) {
+            window.location.href = btn.data('href');
+        }
+    });
+    $('.modal_preview').on('click', function () {
+        var btn = $(this);
+        $('#preview_image').attr('src', btn.data('href'));
+        $('#preview_image').attr('width', 270);
+        $('#preview_image').attr('heigth', 150);
+    });
+</script>
 </body>
 </html>

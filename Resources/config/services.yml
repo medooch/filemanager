@@ -11,3 +11,17 @@ services:
         arguments: ["@service_container"]
         tags:
           - { name: twig.extension }
+
+    filemanager.folder.manager:
+        class: Core\FilemanagerBundle\Manager\FolderManager
+        arguments:  ["@doctrine.orm.entity_manager", "%kernel.root_dir%"]
+
+    filemanager.file.manager:
+        class: Core\FilemanagerBundle\Manager\FileManager
+        arguments:  ["@doctrine.orm.entity_manager", "%kernel.root_dir%"]
+
+    filemanager.folder.manipulator:
+        class: Core\FilemanagerBundle\Events\FolderManipulator
+        arguments:  ["@service_container"]
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }

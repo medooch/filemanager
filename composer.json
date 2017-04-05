@@ -17,7 +17,7 @@
   "require": {
   },
   "autoload": {
-    "psr-4": { "Core\\FilemanagerBundle": "Core\\FilemanagerBundle" },
+    "psr-4": { "Core\\FilemanagerBundle": "Core\\FilemanagerBundle" }
   },
   "extra": {
     "branch-alias": {

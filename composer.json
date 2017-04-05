@@ -1,30 +1,35 @@
 {
-  "name" : "medooch/filemanager",
-  "description" : "Filemanager Bundle for symfony 3",
-  "type" : "symfony-bundle",
-  "authors" : [{
-    "name" : "Trimech Mehdi",
-    "email" : "trimechmehdi11@gmail.com"
-  }],
-  "keywords" : [
+  "name": "medooch/filemanager",
+  "description": "Filemanager Bundle for symfony 3",
+  "type": "symfony-bundle",
+  "authors": [
+    {
+      "name": "Trimech Mehdi",
+      "email": "trimechmehdi11@gmail.com"
+    }
+  ],
+  "keywords": [
     "filemanager symfony3 bundle"
   ],
-  "license" : [
+  "license": [
     "MIT"
   ],
-  "require" : {
+  "require": {
   },
-  "autoload" : {
-    "psr-0" : {
-      "Core\\FilemanagerBundle" : ""
+  "autoload": {
+    "psr-0": {
+      "Core\\FilemanagerBundle": ""
     }
   },
-  "target-dir" : "Core/FilemanagerBundle",
-  "repositories" : [{
-  }],
-  "extra" : {
-    "branch-alias" : {
-      "dev-master" : "1.0-dev"
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/medooch/filemanager.git"
+    }
+  ],
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
     }
   }
 }

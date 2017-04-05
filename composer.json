@@ -23,8 +23,6 @@
   },
   "repositories": [
     {
-      "type": "vcs",
-      "url": "https://github.com/medooch/filemanager.git"
     }
   ],
   "extra": {

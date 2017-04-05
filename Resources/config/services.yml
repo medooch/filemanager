@@ -1,4 +1,7 @@
 services:
-#    filemanager.example:
-#        class: Core\FilemanagerBundle\Example
-#        arguments: ["@service_id", "plain_value", "%parameter%"]
+    gedmo.listener.tree:
+        class: Gedmo\Tree\TreeListener
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+        calls:
+            - [ setAnnotationReader, [ "@annotation_reader"] ]

@@ -1,3 +1,3 @@
-filemanager_homepage:
-    path:     /
-    defaults: { _controller: FilemanagerBundle:Default:index }
+filemanager_index:
+    path:       /
+    defaults:   {_controller: "FilemanagerBundle:Filemanager:index"}

@@ -5,3 +5,9 @@ services:
             - { name: doctrine.event_subscriber, connection: default }
         calls:
             - [ setAnnotationReader, [ "@annotation_reader"] ]
+
+    filemanager.twig_extension:
+        class: Core\FilemanagerBundle\Twig\Extension\FilemanagerExtension
+        arguments: ["@service_container"]
+        tags:
+          - { name: twig.extension }

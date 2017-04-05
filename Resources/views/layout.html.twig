@@ -1,0 +1,53 @@
+{% import "@Filemanager/plugins/macros.html.twig" as macros %}
+<html>
+<head>
+    <link href="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet"/>
+    <link href="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/css/bootstrap-theme.min.css') }}" rel="stylesheet"/>
+    <link href="{{ asset('bundles/filemanager/css/style.css') }}" rel="stylesheet"/>
+    <link href="{{ asset('bundles/filemanager/css/filetypeicons.css') }}" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="container">
+    <h3 class="text-info">Filemanager</h3>
+    <div class="row">
+        {% block body %}
+        <div class="col-md-12">
+            <ol class="breadcrumb">
+                <li><a href="{{ url('filemanager_index') }}">Home</a></li>
+                {{ breadCrumb(app.request.query.get('dir'))|raw }}
+            </ol>
+        </div>
+        {% for dir in directories %}
+            <div class="col-md-2">
+                <div class="{{ dir.type }}">
+                    <a href="{{ url('filemanager_index', {'dir' : app.request.query.get('dir') ~ '/' ~ dir.filename}) }}">
+                        <div class="fileicon {{ dir.type }}"></div>
+                        <span class="row text-success text-document">{{ dir.filename }}</span>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+        {% for item in files %}
+            <div class="col-md-2">
+                <div class="{{ item.type }}">
+                    <a href="{{ url_file(item) }}">
+                        <div class="fileicon {% if item.type != 'dir' %}{{ fileType(item) }} {% endif %}{{ item.type }}"></div>
+                        <span class="row text-success text-document">{{ item.filename ~ ' ' ~ macros.bytesToSize(item.size) }}</span>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% if not files|length and not directories|length %}
+            <span class="text-warning">This directory is empty</span>
+        {% endif %}
+    </div>
+    {% endblock %}
+</div>
+</div>
+
+<script src="{{ asset('bundles/filemanager/node_modules/jquery/dist/jquery.min.js') }}" type="text/javascript"></script>
+<script src="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/js/bootstrap.min.js') }}" type="text/javascript"></script>
+</body>
+</html>

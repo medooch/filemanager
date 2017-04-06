@@ -1,0 +1,3 @@
+parameters:
+    root_dir: "%kernel.root_dir%/../web/data"
+    excludes: "reamdme.md"

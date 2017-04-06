@@ -15,10 +15,11 @@
     "MIT"
   ],
   "require": {
+    "stof/doctrine-extensions-bundle": "^1.2"
   },
   "autoload": {
-    "psr-0": {
-      "Core\\FilemanagerBundle": ""
+    "psr-4": {
+      "Core\\FilemanagerBundle\\": ""
     }
   },
   "extra": {

@@ -1,4 +1,41 @@
 services:
-#    filemanager.example:
-#        class: Core\FilemanagerBundle\Example
-#        arguments: ["@service_id", "plain_value", "%parameter%"]
+    gedmo.listener.tree:
+        class: Gedmo\Tree\TreeListener
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+        calls:
+            - [ setAnnotationReader, [ "@annotation_reader"] ]
+
+    gedmo.listener.ip_traceable:
+        class: Gedmo\IpTraceable\IpTraceableListener
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+        calls:
+            - [ setAnnotationReader, [ "@annotation_reader"] ]
+
+    gedmo.listener.timestampable:
+        class: Gedmo\Timestampable\TimestampableListener
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+        calls:
+            - [ setAnnotationReader, [ "@annotation_reader"] ]
+
+    filemanager.twig_extension:
+        class: Core\FilemanagerBundle\Twig\Extension\FilemanagerExtension
+        arguments: ["@service_container"]
+        tags:
+          - { name: twig.extension }
+
+    filemanager.folder.manager:
+        class: Core\FilemanagerBundle\Manager\FolderManager
+        arguments:  ["@doctrine.orm.entity_manager", "%kernel.root_dir%"]
+
+    filemanager.file.manager:
+        class: Core\FilemanagerBundle\Manager\FileManager
+        arguments:  ["@doctrine.orm.entity_manager", "%kernel.root_dir%"]
+
+    filemanager.folder.manipulator:
+        class: Core\FilemanagerBundle\Events\FolderManipulator
+        arguments:  ["@service_container"]
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }

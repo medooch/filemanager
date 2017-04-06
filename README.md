@@ -55,3 +55,20 @@ import bundle routing:
         prefix:   /filemanager
         
 Note : The filemanager by default import the LiipImagine routing, you don't need to redefine it.
+
+
+# Usage
+
+Access to filemanager
+-----------
+Http://your-domain-name/app_dev.php/filemanager
+
+
+# Copyright
+
+Contact us for more information:
+
+    Trimech Mahdi <trimechmehdi11@gmail.com>
+        Contact : http://www.trimech-mahdi.fr/cv/contact
+        Skype: khnesiano
+        Linkedin: https://tn.linkedin.com/in/mahdi-trimech-8a3614100 

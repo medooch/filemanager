@@ -2,7 +2,9 @@
 
 namespace Core\FilemanagerBundle\Entity;
 
+use Core\FilemanagerBundle\Traits\TracableTrait;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Files
@@ -13,6 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Files
 {
+    use TracableTrait;
     /**
      * @var int
      *

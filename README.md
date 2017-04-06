@@ -6,7 +6,7 @@ Note : Compatible with symfony2.
 
 This bundle provider a simple filemanager based on symfony3 framework.
 
-#Install
+# Install
 
 Add this to your composer.json
 
@@ -47,3 +47,11 @@ add this to config.yml
                     auto_rotate: ~
                     strip: ~
                     thumbnail: { size: [100, 60], mode: inset }
+                    
+import bundle routing:
+    
+    filemanager:
+        resource: "@FilemanagerBundle/Resources/config/routing.yml"
+        prefix:   /filemanager
+        
+Note : The filemanager by default import the LiipImagine routing, you don't need to redefine it.

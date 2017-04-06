@@ -4,3 +4,6 @@ filemanager_index:
 filemanager_actions:
     path:       /do
     defaults:   {_controller: "FilemanagerBundle:Filemanager:do"}
+
+_liip_imagine:
+    resource: "@LiipImagineBundle/Resources/config/routing.xml"

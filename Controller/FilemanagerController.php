@@ -8,6 +8,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 class FilemanagerController extends Controller
 {
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function indexAction(Request $request)
     {
         $manager = $this->get('filemanager.folder.manager');

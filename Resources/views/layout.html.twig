@@ -111,38 +111,12 @@
                         </div>
                     </div>
                     <div class="col-md-12">
-                        {% for directory in directories %}
-                            <div class="col-md-2">
-                                {% set params = app.request.query.all|merge({'dir' : directory.id}) %}
-                                <a href="{{ url('filemanager_index', params) }}">
-                                    <div class="fileicon dir">
-                                        <span class="row text-success text-document">
-                                            {{ directory.fullName }}
-                                        </span>
-                                    </div>
-                                </a>
-                                <div class="actions">
-                                    <a href=""><i class="glyphicon glyphicon-edit"></i></a>
-                                    <a class="delete_element" href="#" data-href="{{ url('filemanager_actions', {'action' : 'delete', 'target' : directory.id }) }}"><i class="glyphicon glyphicon-trash"></i></a>
-                                </div>
-                            </div>
-                        {% endfor %}
                         {% if folder.files|length %}
-                            {% for file in folder.files %}
-                                <div class="col-md-2">
-                                    <a {% if fileType(file) == 'image' %}class="modal_preview" data-toggle="modal" data-target="#modal_preview" data-href="{{ url_file(file) }}" {% else %}target="_blank" href="{{ url_file(file) }}"{% endif %}>
-                                        <div class="fileicon {{ fileType(file) }}">
-                                        <span class="row text-success text-document">
-                                            {{ file.name }}
-                                        </span>
-                                        </div>
-                                    </a>
-                                    <div class="actions">
-                                        <a href=""><i class="glyphicon glyphicon-edit"></i></a>
-                                        {#<a class="delete_element" href="#" data-href="{{ url('filemanager_actions', {'action' : 'delete', 'target' : directory.id }) }}"><i class="glyphicon glyphicon-trash"></i></a>#}
-                                    </div>
-                                </div>
-                            {% endfor %}
+                            {% if view == 'grid' %}
+                                {% include '@Filemanager/plugins/grid.html.twig' with { 'directories' : directories, 'files' : folder.files} %}
+                            {% else %}
+                                {% include '@Filemanager/plugins/list.html.twig' with { 'directories' : directories, 'files' : folder.files} %}
+                            {% endif %}
                         {% endif %}
                     </div>
                 {% endif %}

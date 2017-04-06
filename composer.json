@@ -15,6 +15,7 @@
     "MIT"
   ],
   "require": {
+    "liip/imagine-bundle": "^1.6",
     "stof/doctrine-extensions-bundle": "^1.2"
   },
   "autoload": {

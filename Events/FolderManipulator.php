@@ -68,8 +68,23 @@ class FolderManipulator implements EventSubscriber
         $rootDir = $this->container->getParameter('kernel.root_dir');
         if ($entity instanceof Folders) {
             $fileSystem = $this->container->get('filemanager.twig_extension');
+            $dir = $rootDir . '/../web/' . $entity->getPath();
 
-            $fileSystem->createDir($rootDir . '/../web/' . $entity->getPath());
+            /** create the folder MKDIR */
+            $fileSystem->createDir($dir);
+
+            /** Manipulate folder permissions */
+            switch ($entity->getPermissions()) {
+                case 0:
+                    $fileSystem->chmod($dir, 0000);
+                    break;
+                case 1:
+                    $fileSystem->chmod($dir, 0555);
+                    break;
+                case 2:
+                    $fileSystem->chmod($dir, 0777);
+                    break;
+            }
         }
     }
 

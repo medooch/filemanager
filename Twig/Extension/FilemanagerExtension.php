@@ -21,6 +21,10 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
+/**
+ * Class FilemanagerExtension
+ * @package Core\FilemanagerBundle\Twig\Extension
+ */
 class FilemanagerExtension extends \Twig_Extension
 {
     /**
@@ -33,6 +37,10 @@ class FilemanagerExtension extends \Twig_Extension
      */
     private $container;
 
+    /**
+     * FilemanagerExtension constructor.
+     * @param ContainerInterface $container
+     */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -48,6 +56,9 @@ class FilemanagerExtension extends \Twig_Extension
         return 'filemanager';
     }
 
+    /**
+     * @return array
+     */
     public function getFunctions()
     {
         return array(
@@ -55,7 +66,16 @@ class FilemanagerExtension extends \Twig_Extension
             'url_file' => new \Twig_Function_Method($this, 'urlFile'),
             'breadCrumb' => new \Twig_Function_Method($this, 'breadCrumb'),
             'unset' => new \Twig_Function_Method($this, 'unset_array'),
+            'has_permissions' => new \Twig_Function_Method($this, 'hasPermissions'),
         );
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasPermissions()
+    {
+        return $this->container->get('security.authorization_checker')->isGranted($this->container->getParameter('permissions.role'));
     }
 
     /**
@@ -73,7 +93,7 @@ class FilemanagerExtension extends \Twig_Extension
     }
 
     /**
-     * @param string $dir
+     * @param Folders $folder
      * @return string
      */
     public function breadCrumb(Folders $folder)
@@ -87,6 +107,10 @@ class FilemanagerExtension extends \Twig_Extension
         return $this->output;
     }
 
+    /**
+     * @param Folders $folder
+     * @return string
+     */
     public function breadCrumbItem(Folders $folder)
     {
         return '<li><a href="?dir=' . $folder->getId() . '">' . $folder->getFullName() . '</a></li>';
@@ -137,11 +161,19 @@ class FilemanagerExtension extends \Twig_Extension
         return 'inexistent ' . $mimeType;
     }
 
+    /**
+     * @param $mimeType
+     * @return int
+     */
     public function _isAudio($mimeType)
     {
         return (preg_match('/audio\/.*/i', $mimeType));
     }
 
+    /**
+     * @param $mimeType
+     * @return bool
+     */
     public function _isArchive($mimeType)
     {
         return (
@@ -155,16 +187,28 @@ class FilemanagerExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $mimeType
+     * @return int
+     */
     public function _isHTML($mimeType)
     {
         return (preg_match('/text\/html/i', $mimeType));
     }
 
+    /**
+     * @param $mimeType
+     * @return int
+     */
     public function _isImage($mimeType)
     {
         return (preg_match('/image\/.*/i', $mimeType));
     }
 
+    /**
+     * @param $mimeType
+     * @return bool
+     */
     public function _isPDFDocument($mimeType)
     {
         return (
@@ -174,11 +218,19 @@ class FilemanagerExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $mimeType
+     * @return int
+     */
     public function _isPlainText($mimeType)
     {
         return (preg_match('/text\/plain/i', $mimeType));
     }
 
+    /**
+     * @param $mimeType
+     * @return bool
+     */
     public function _isPresentation($mimeType)
     {
         return (
@@ -188,6 +240,10 @@ class FilemanagerExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $mimeType
+     * @return bool
+     */
     public function _isSpreadsheet($mimeType)
     {
         return (
@@ -197,6 +253,10 @@ class FilemanagerExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $mimeType
+     * @return bool
+     */
     public function _isTextDocument($mimeType)
     {
         return (
@@ -206,6 +266,10 @@ class FilemanagerExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $mimeType
+     * @return int
+     */
     public function _isVideo($mimeType)
     {
         return (preg_match('/video\/.*/i', $mimeType));

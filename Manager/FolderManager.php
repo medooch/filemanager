@@ -50,15 +50,19 @@ class FolderManager
      * @param Folders|null $parent
      * @return Folders
      */
-    public function create($path, $name, $fullname, Folders $parent = null)
+    public function create($path, $name, $fullname, Folders $parent = null, $permissions = null)
     {
         $folder = new Folders();
         $folder->setName($name);
         $folder->setFullName($fullname);
 
+        $folder->setPermissions($permissions);
         if ($parent) {
             $folder->setParent($parent);
             $path = $parent->getPath() . '/' . $path;
+            if (!$permissions){
+                $folder->setPermissions($parent->getPermissions());
+            }
         }
 
         $folder->setPath($path);
@@ -164,7 +168,6 @@ class FolderManager
     }
 
     /**
-     * @param $dir
      * @return Folders|null|object
      */
     public function main()
@@ -174,10 +177,13 @@ class FolderManager
         ));
     }
 
+    /**
+     * @return Folders
+     */
     public function initRootDir()
     {
         $path = $this->rootDir . '/../web/data';
         $name = $fullname = str_replace($this->rootDir . '/../web/', '', $path);
-        return $this->create($name, $name, $fullname);
+        return $this->create($name, $name, $fullname, null, 2);
     }
 }

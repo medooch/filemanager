@@ -23,8 +23,7 @@
                 <td></td>
                 <td></td>
                 <td>
-                    <a href=""><i class="glyphicon glyphicon-edit"></i></a>
-                    <a class="delete_element" href="#" data-href="{{ url('filemanager_actions', {'action' : 'delete', 'target' : directory.id }) }}"><i class="glyphicon glyphicon-trash"></i></a>
+                    {% include '@Filemanager/folders/folders_action.html.twig' with {'directory' : directory} %}
                 </td>
             </tr>
         {% endfor %}
@@ -39,8 +38,8 @@
                 <td>
                     <span class="row text-success text-document">{{ file.name }}</span>
                 </td>
-                <td></td>
-                <td></td>
+                <td>{{ macros.bytesToSize(file.size) }}</td>
+                <td>{{ type|upper }}</td>
                 <td>
                     <a href=""><i class="glyphicon glyphicon-edit"></i></a>
                     <a class="delete_element" href="#"><i class="glyphicon glyphicon-trash"></i></a>

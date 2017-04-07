@@ -59,6 +59,11 @@ class Folders
     private $path;
 
     /**
+     * @ORM\Column(name="permissions", type="string", length=4, nullable=true)
+     */
+    private $permissions;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="fullName", type="string", length=255)
@@ -408,5 +413,21 @@ class Folders
     public function getFiles()
     {
         return $this->files;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPermissions()
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * @param mixed $permissions
+     */
+    public function setPermissions($permissions)
+    {
+        $this->permissions = $permissions;
     }
 }

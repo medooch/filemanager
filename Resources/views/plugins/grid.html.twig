@@ -9,8 +9,7 @@
             </div>
         </a>
         <div class="actions">
-            <a href=""><i class="glyphicon glyphicon-edit"></i></a>
-            <a class="delete_element" href="#" data-href="{{ url('filemanager_actions', {'action' : 'delete', 'target' : directory.id }) }}"><i class="glyphicon glyphicon-trash"></i></a>
+            {% include '@Filemanager/folders/folders_action.html.twig' with {'directory' : directory} %}
         </div>
     </div>
 {% endfor %}

@@ -1,9 +1,14 @@
 filemanager_index:
     path:       /
     defaults:   {_controller: "FilemanagerBundle:Filemanager:index"}
+
 filemanager_actions:
     path:       /do
     defaults:   {_controller: "FilemanagerBundle:Filemanager:do"}
+
+filemanager_folder_permissions:
+    path:       /folder-permissions/{id}
+    defaults:   {_controller: "FilemanagerBundle:Filemanager:folderPermissions"}
 
 _liip_imagine:
     resource: "@LiipImagineBundle/Resources/config/routing.xml"

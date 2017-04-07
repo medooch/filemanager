@@ -14,7 +14,9 @@
 namespace Core\FilemanagerBundle\Controller;
 
 use Core\FilemanagerBundle\Entity\Files;
+use Core\FilemanagerBundle\Entity\Folders;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -32,13 +34,21 @@ class FilemanagerController extends Controller
         /** @var get the default folder in database $manager */
         $manager = $this->get('filemanager.folder.manager');
         if ($request->query->has('dir')) {
-            $folder = $manager->find($request->query->get('dir'));
+            $folder = $manager->getQuery()->where('e.id = :id')->andWhere('e.permissions in (:permissions)')->setParameters(array(
+                'id' => $request->query->get('dir'),
+                'permissions' => array(1, 2)
+
+            ))->setMaxResults(1)->getQuery()->getOneOrNullResult();
         } else {
             $folder = $manager->main();
             if (!$folder) {
                 /** @var init the main root defined on the bundle configuration $folder */
                 $folder = $manager->initRootDir();;
             }
+        }
+
+        if (!$folder) {
+            throw $this->createNotFoundException('Folder is not defined, please check if you have the right access!');
         }
 
         /** @var get Directories from folders_table $query */
@@ -117,7 +127,7 @@ class FilemanagerController extends Controller
                     if ($formUpload->isValid()) {
                         $file = $formUpload->getData();
                         $file->setFolder($manager->find($request->get('target')));
-                        $file->setUploadPath($this->getParameter('kernel.root_dir') .'/../web/');
+                        $file->setUploadPath($this->getParameter('kernel.root_dir') . '/../web/');
                         $fileManager->create($formUpload->getData());
                     }
                 }
@@ -126,5 +136,53 @@ class FilemanagerController extends Controller
             case 'rename':
                 break;
         }
+    }
+
+    /**
+     * @param Request $request
+     * @param Folders $folders
+     * @return JsonResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function folderPermissionsAction(Request $request, Folders $folders)
+    {
+        if (!$this->isGranted($this->getParameter('permissions.role'))){
+            throw $this->createAccessDeniedException('Access denied!');
+        }
+        $form = $this->createForm('Core\FilemanagerBundle\Form\FolderPermissions', $folders);
+
+        /** submit form if method is POST */
+        if ($request->isMethod('POST')) {
+            $form->handleRequest($request);
+            if ($status = $form->isValid()) {
+                /** @var get folder dir $path */
+                $path = $this->getParameter('kernel.root_dir') . '/../web';
+                $dir = $path . '/' . $folders->getPath();
+
+                if (is_dir($dir)) {
+                    /** change folder permissions with the data of form */
+                    switch ($folders->getPermissions()) {
+                        case 0:
+                            chmod($dir, 0000);
+                            break;
+                        case 1:
+                            chmod($dir, 0555);
+                            break;
+                        case 2:
+                            chmod($dir, 0777);
+                            break;
+                    }
+                    $em = $this->get('doctrine.orm.default_entity_manager');
+                    $em->flush();
+                }
+            }
+
+            return new JsonResponse(array(
+                'status' => $status,
+            ));
+        }
+
+        return $this->render('@Filemanager/folders/permissions.html.twig', array(
+            'form' => $form->createView()
+        ));
     }
 }

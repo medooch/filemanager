@@ -1,0 +1,19 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Manager permissions for {{ form.vars.data.fullName|upper }}</h4>
+</div>
+{{ form_start(form, {'attr' : {'id': form.vars.id, 'action' : url('filemanager_folder_permissions', {'id' : form.vars.data.id})}}) }}
+<div class="modal-body">
+    {{ form_widget(form) }}
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    <button type="submit" name="action" value="create" class="btn btn-primary">Save changes</button>
+</div>
+{{ form_end(form) }}
+<script type="text/javascript">
+    $('#{{ form.vars.id }}').submit(function (e) {
+        e.preventDefault();
+        submitFormAjax($(this));
+    })
+</script>

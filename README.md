@@ -63,6 +63,10 @@ Access to filemanager
 -----------
 Http://your-domain-name/app_dev.php/filemanager
 
+Override views
+-----------
+   To change the views list or grid you can create folder app/Resources/FilemanagerBundle/views/plugins
+   and copy past Vendor/medooch/file-manager/etc....
 
 # Copyright
 

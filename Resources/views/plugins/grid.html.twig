@@ -9,7 +9,7 @@
             </div>
         </a>
         <div class="actions">
-            {% include '@Filemanager/folders/folders_action.html.twig' with {'directory' : directory} %}
+            {% include '@Filemanager/folders/folders_actions.html.twig' with {'directory' : directory} %}
         </div>
     </div>
 {% endfor %}
@@ -22,8 +22,7 @@
             </div>
         </a>
         <div class="actions">
-            <a href=""><i class="glyphicon glyphicon-edit"></i></a>
-            {#<a class="delete_element" href="#" data-href="{{ url('filemanager_actions', {'action' : 'delete', 'target' : directory.id }) }}"><i class="glyphicon glyphicon-trash"></i></a>#}
+            {% include '@Filemanager/files/files_actions.html.twig' with {'file' : file} %}
         </div>
     </div>
 {% endfor %}

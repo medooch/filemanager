@@ -1,151 +1,154 @@
-{% import "@Filemanager/plugins/macros.html.twig" as macros %}
-<html>
-<head>
-    <link href="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet"/>
-    <link href="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/css/bootstrap-theme.min.css') }}" rel="stylesheet"/>
-    <link href="{{ asset('bundles/filemanager/css/style.css') }}" rel="stylesheet"/>
-    <link href="{{ asset('bundles/filemanager/css/filetypeicons.css') }}" rel="stylesheet"/>
-</head>
-<body>
+{% spaceless %}
+    {% import "@Filemanager/plugins/macros.html.twig" as macros %}
+    <html>
+    <head>
+        <link href="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet"/>
+        <link href="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/css/bootstrap-theme.min.css') }}" rel="stylesheet"/>
+        <link href="{{ asset('bundles/filemanager/css/style.css') }}" rel="stylesheet"/>
+        <link href="{{ asset('bundles/filemanager/css/filetypeicons.css') }}" rel="stylesheet"/>
+    </head>
+    <body>
 
-<div class="container">
-    <h3 class="text-info">Filemanager</h3>
-    <div class="row">
-        {% block body %}
-            <div class="col-md-12">
-                <ol class="breadcrumb">
-                    {% set params = app.request.query.all %}
-                    {% if folder.parent %}
-                        {% set params = params|merge({'dir' : folder.parent.id}) %}
-                        <li><a href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-menu-left"></i></a></li>
-                    {% else %}
-                        {% set params = unset(params, 'dir') %}
-                        <li><a href="#"><i class="glyphicon glyphicon-home"></i></a></li>
-                    {% endif %}
-                </ol>
-                <div class="col-md-4">
-                    <div class="actions">
-                        <!-- Button trigger modal -->
-                        <button{% if folder.permissions != 2 %} data-toggle="tooltip" data-placement="bottom" title="This action is not allowed! The folder is on mode read only" style="cursor: not-allowed;" {% else %} data-toggle="modal" data-target="#new_folder"{% endif %} type="button" class="btn btn-primary btn-xs">
-                            New folder
-                        </button>
-                        <button{% if folder.permissions != 2 %} data-toggle="tooltip" data-placement="bottom" title="This action is not allowed! The folder is on mode read only" style="cursor: not-allowed;" {% else %} data-toggle="modal" data-target="#upload"{% endif %} type="button" class="btn btn-primary btn-xs">
-                            Upload
-                        </button>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="new_folder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                            <div class="modal-dialog modal-sm" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                        <h4 class="modal-title" id="myModalLabel">New folder</h4>
-                                    </div>
-                                    <form action="{{ url('filemanager_actions') }}" method="post">
-                                        <div class="modal-body">
-                                            <input required name="folder_name" type="text" class="form-control input-sm" placeholder="Create folder..."/>
-                                            <input type="hidden" name="target" value="{{ folder.id }}"/>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                            <button type="submit" name="action" value="create" class="btn btn-primary">Save changes</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="upload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                            <div class="modal-dialog modal-lg" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                        <h4 class="modal-title" id="myModalLabel">Upload</h4>
-                                    </div>
-                                    <form action="{{ url('filemanager_actions') }}" method="post" enctype="multipart/form-data">
-                                        <div class="modal-body">
-                                            {{ form_widget(formUpload) }}
-                                            <input type="hidden" name="target" value="{{ folder.id }}"/>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                            <button type="submit" name="action" value="upload_file" class="btn btn-primary">Save changes</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% if not directories|length and not folder.files|length %}
-                    <div class="col-md-12"><span class="text-warning">This directory is empty</span></div>
-                {% else %}
-                    <div class="col-md-3">
-                        {% set params = app.request.query.all|merge({'view': 'grid' }) %}
-                        <a class="{% if view == 'grid' %}active {% endif %}btn btn-default btn-sm" href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-th-large"></i></a>
-                        {% set params = app.request.query.all|merge({'view': 'list' }) %}
-                        <a class="{% if view == 'list' %}active {% endif %}btn btn-default btn-sm" href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-align-justify"></i></a>
-                    </div>
-                    <div class="pull-right col-md-4">
-                        <div class="actions">
-                            <!-- Single button -->
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="glyphicon glyphicon-sort"></i> <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    {% set direction = 'asc' %}
-                                    {% if app.request.query.get('direction') == 'asc' %}
-                                        {% set direction = 'desc' %}
-                                    {% endif %}
-                                    {% set params = app.request.query.all|merge({'direction': direction }) %}
-                                    {% set params = params|merge({'sort' : 'name'}) %}
-                                    <li><a href="{{ url('filemanager_index', params) }}">Name</a></li>
-                                    {% set params = params|merge({'sort' : 'created-at'}) %}
-                                    <li><a href="{{ url('filemanager_index', params) }}">CreatedAt</a></li>
-                                    {% set params = params|merge({'sort' : 'updated-at'}) %}
-                                    <li><a href="{{ url('filemanager_index', params) }}">UpdatedAt</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        {% if folder.files|length %}
-                            {% if view == 'grid' %}
-                                {% include '@Filemanager/plugins/grid.html.twig' with { 'directories' : directories, 'files' : folder.files} %}
-                            {% else %}
-                                {% include '@Filemanager/plugins/list.html.twig' with { 'directories' : directories, 'files' : folder.files} %}
-                            {% endif %}
+    <div class="container">
+        <h3 class="text-info">Filemanager</h3>
+        <div class="row">
+            {% block body %}
+                <div class="col-md-12">
+                    <ol class="breadcrumb">
+                        {% set params = app.request.query.all %}
+                        {% if folder.parent %}
+                            {% set params = params|merge({'dir' : folder.parent.id}) %}
+                            <li><a href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-menu-left"></i></a></li>
+                        {% else %}
+                            {% set params = unset(params, 'dir') %}
+                            <li><a href="#"><i class="glyphicon glyphicon-home"></i></a></li>
                         {% endif %}
-                    </div>
-                {% endif %}
-            </div>
-            <div class="modal fade remote" id="modal_preview" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-                <div class="modal-dialog modal-sm" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        </div>
-                        <div class="modal-body">
-                            <img id="preview_image"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade remote" id="modal_permissions" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
-                <div class="modal-dialog modal-sm" role="document">
-                    <div class="modal-content">
-                    </div>
-                </div>
-            </div>
-        {% endblock %}
-    </div>
-</div>
+                    </ol>
+                    <div class="col-md-4">
+                        <div class="actions">
+                            <!-- Button trigger modal -->
+                            <button{% if folder.permissions != 2 %} data-toggle="tooltip" data-placement="bottom" title="This action is not allowed! The folder is on mode read only" style="cursor: not-allowed;" {% else %} data-toggle="modal" data-target="#new_folder"{% endif %} type="button" class="btn btn-primary btn-xs">
+                                New folder
+                            </button>
+                            <button{% if folder.permissions != 2 %} data-toggle="tooltip" data-placement="bottom" title="This action is not allowed! The folder is on mode read only" style="cursor: not-allowed;" {% else %} data-toggle="modal" data-target="#upload"{% endif %} type="button" class="btn btn-primary btn-xs">
+                                Upload
+                            </button>
+                            {% if folder.permissions == 2 %}
+                                <!-- Modal -->
+                                <div class="modal fade" id="new_folder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                    <div class="modal-dialog modal-sm" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                <h4 class="modal-title" id="myModalLabel">New folder</h4>
+                                            </div>
+                                            <form action="{{ url('filemanager_actions') }}" method="post">
+                                                <div class="modal-body">
+                                                    <input required name="folder_name" type="text" class="form-control input-sm" placeholder="Create folder..."/>
+                                                    <input type="hidden" name="target" value="{{ folder.id }}"/>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default btn-xs" data-dismiss="modal">Close</button>
+                                                    <button type="submit" name="action" value="create" class="btn btn-primary btn-xs">Save changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
 
-<script src="{{ asset('bundles/filemanager/node_modules/jquery/dist/jquery.min.js') }}" type="text/javascript"></script>
-<script src="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/js/bootstrap.min.js') }}" type="text/javascript"></script>
-<script src="{{ asset('bundles/filemanager/js/blockUi.js') }}"></script>
-<script type="text/javascript" src="{{ asset('bundles/filemanager/js/main.js') }}"></script>
-</body>
-</html>
+                                <!-- Modal -->
+                                <div class="modal fade" id="upload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                    <div class="modal-dialog modal-sm" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                <h4 class="modal-title" id="myModalLabel">Upload</h4>
+                                            </div>
+                                            <form action="{{ url('filemanager_actions') }}" method="post" enctype="multipart/form-data">
+                                                <div class="modal-body">
+                                                    {{ form_widget(formUpload) }}
+                                                    <input type="hidden" name="target" value="{{ folder.id }}"/>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default btn-xs" data-dismiss="modal">Close</button>
+                                                    <button type="submit" name="action" value="upload_file" class="btn btn-primary btn-xs">Save changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if not directories|length and not folder.files|length %}
+                        <div class="col-md-12"><span class="text-warning">This directory is empty</span></div>
+                    {% else %}
+                        <div class="col-md-3">
+                            {% set params = app.request.query.all|merge({'view': 'grid' }) %}
+                            <a class="{% if view == 'grid' %}active {% endif %}btn btn-default btn-sm" href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-th-large"></i></a>
+                            {% set params = app.request.query.all|merge({'view': 'list' }) %}
+                            <a class="{% if view == 'list' %}active {% endif %}btn btn-default btn-sm" href="{{ url('filemanager_index', params) }}"><i class="glyphicon glyphicon-align-justify"></i></a>
+                        </div>
+                        <div class="pull-right col-md-4">
+                            <div class="actions">
+                                <!-- Single button -->
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="glyphicon glyphicon-sort"></i> <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% set direction = 'asc' %}
+                                        {% if app.request.query.get('direction') == 'asc' %}
+                                            {% set direction = 'desc' %}
+                                        {% endif %}
+                                        {% set params = app.request.query.all|merge({'direction': direction }) %}
+                                        {% set params = params|merge({'sort' : 'name'}) %}
+                                        <li><a href="{{ url('filemanager_index', params) }}">Name</a></li>
+                                        {% set params = params|merge({'sort' : 'created-at'}) %}
+                                        <li><a href="{{ url('filemanager_index', params) }}">CreatedAt</a></li>
+                                        {% set params = params|merge({'sort' : 'updated-at'}) %}
+                                        <li><a href="{{ url('filemanager_index', params) }}">UpdatedAt</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            {% if folder.childrens|length or folder.files|length %}
+                                {% if view == 'grid' %}
+                                    {% include '@Filemanager/plugins/grid.html.twig' with { 'directories' : directories, 'files' : folder.files} %}
+                                {% else %}
+                                    {% include '@Filemanager/plugins/list.html.twig' with { 'directories' : directories, 'files' : folder.files} %}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="modal fade remote" id="modal_preview" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                    <div class="modal-dialog modal-sm" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <img id="preview_image"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade remote" id="modal_permissions" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+                    <div class="modal-dialog modal-sm" role="document">
+                        <div class="modal-content">
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+
+    <script src="{{ asset('bundles/filemanager/node_modules/jquery/dist/jquery.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('bundles/filemanager/node_modules/bootstrap/dist/js/bootstrap.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('bundles/filemanager/js/blockUi.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/filemanager/js/main.js') }}"></script>
+    </body>
+    </html>
+{% endspaceless %}

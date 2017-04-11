@@ -46,7 +46,6 @@ class FilemanagerController extends Controller
                 $folder = $manager->initRootDir();;
             }
         }
-
         if (!$folder) {
             throw $this->createNotFoundException('Folder is not defined, please check if you have the right access!');
         }
@@ -116,7 +115,6 @@ class FilemanagerController extends Controller
             /** delete folder */
             case 'delete':
                 $manager->delete($request->get('target'));
-                return $this->redirectToRoute('filemanager_index', array('dir' => $request->get('dir')));
                 break;
             /** upload file */
             case 'upload_file':
@@ -133,9 +131,19 @@ class FilemanagerController extends Controller
                 }
                 return $this->redirectToRoute('filemanager_index', array('dir' => $request->get('target')));
                 break;
-            case 'rename':
+            /** delete folder */
+            case 'delete-file':
+                $this->get('filemanager.file.manager')->delete($request->get('id'));
+                break;
+            /** rename file */
+            case 'rename-file':
+                $this->get('filemanager.file.manager')->update($request->get('file-name'), $request->get('id'));
+                break;
+            /** rename folder */
+            case 'rename-folder':
                 break;
         }
+        return $this->redirectToRoute('filemanager_index', array('dir' => $request->get('dir')));
     }
 
     /**
@@ -145,7 +153,7 @@ class FilemanagerController extends Controller
      */
     public function folderPermissionsAction(Request $request, Folders $folders)
     {
-        if (!$this->isGranted($this->getParameter('permissions.role'))){
+        if (!$this->isGranted($this->getParameter('permissions.role'))) {
             throw $this->createAccessDeniedException('Access denied!');
         }
         $form = $this->createForm('Core\FilemanagerBundle\Form\FolderPermissions', $folders);
@@ -176,6 +184,7 @@ class FilemanagerController extends Controller
                 }
             }
 
+            /** return JSON Response */
             return new JsonResponse(array(
                 'status' => $status,
             ));

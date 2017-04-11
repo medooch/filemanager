@@ -45,8 +45,7 @@ class FileManager
     }
 
     /**
-     * @param array $filePost
-     * @param $folder
+     * @param Files $file
      * @return Files
      */
     public function create(Files $file)
@@ -58,28 +57,24 @@ class FileManager
     }
 
     /**
-     * @param $path
      * @param $name
-     * @param $fullname
      * @param $id
      * @return Folders|null|object
      */
-    public function update($path, $name, $fullname, $id)
+    public function update($name, $id)
     {
-        $folder = $this->find($id);
+        $file = $this->find($id);
 
-        if (!$folder) {
-            throw new NotFoundHttpException('Folder ' . $id . ' dosnt exist.');
+        if (!$file) {
+            throw new NotFoundHttpException('File ' . $id . ' dosnt exist.');
         }
 
-        $folder->setName($name);
-        $folder->setFullName($fullname);
-        $folder->setPath($path);
+        $file->setName($name);
 
-        $this->entityManager->persist($folder);
+        $this->entityManager->persist($file);
         $this->entityManager->flush();
 
-        return $folder;
+        return $file;
     }
 
     /**
@@ -88,13 +83,13 @@ class FileManager
      */
     public function delete($id)
     {
-        $folder = $this->find($id);
+        $file = $this->find($id);
 
-        if (!$folder) {
-            throw new NotFoundHttpException('Folder ' . $id . ' dosnt exist.');
+        if (!$file) {
+            throw new NotFoundHttpException('File ' . $id . ' dosnt exist.');
         }
 
-        $this->entityManager->remove($folder);
+        $this->entityManager->remove($file);
         $this->entityManager->flush();
 
         return true;
@@ -140,7 +135,7 @@ class FileManager
      */
     public function repository()
     {
-        return $this->entityManager->getRepository('FilemanagerBundle:Folders');
+        return $this->entityManager->getRepository('FilemanagerBundle:Files');
     }
 
     /**
@@ -149,23 +144,5 @@ class FileManager
     public function getQuery()
     {
         return $this->repository()->createQueryBuilder('e');
-    }
-
-    /**
-     * @param $dir
-     * @return Folders|null|object
-     */
-    public function main()
-    {
-        return $this->findOneBy(array(
-            'lvl' => 0,
-        ));
-    }
-
-    public function initRootDir()
-    {
-        $path = $this->rootDir . '/../web/data';
-        $name = $fullname = str_replace($this->rootDir . '/../web/', '', $path);
-        return $this->create($name, $name, $fullname);
     }
 }

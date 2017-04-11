@@ -67,6 +67,7 @@ class Files
     /**
      * @var
      * @ORM\ManyToOne(targetEntity="Folders", inversedBy="files")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      */
     private $folder;
 
@@ -124,11 +125,16 @@ class Files
     }
 
     /**
+     * @param null $name
      * @return $this
      */
-    public function setName()
+    public function setName($name = null)
     {
-        $this->name = $this->file->getClientOriginalName();
+        if ($name) {
+            $this->name = $name;
+        } else {
+            $this->name = $this->file->getClientOriginalName();
+        }
 
         return $this;
     }
